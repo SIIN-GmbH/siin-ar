@@ -19,8 +19,79 @@
       <div id="ar-prompt">
           <img src="ar_hand_prompt.png">
       </div>
-    </model-viewer>  
+    </model-viewer>
+
+    <!-- Video-Button -->
+    <button id="video-button" type="button">Videos ansehen</button>
+
+    <!-- Video-Overlay -->
+    <div id="video-overlay" role="dialog" aria-modal="true" aria-label="Videos">
+      <button id="video-close" type="button" aria-label="Schließen">&times;</button>
+      <video id="video-player" controls playsinline preload="metadata"></video>
+      <div class="video-tabs">
+        <button class="video-tab active" type="button" data-index="0">Video 1</button>
+        <button class="video-tab" type="button" data-index="1">Video 2</button>
+      </div>
+    </div>
+
     <script src="script.js"></script>
+    <script>
+      (function () {
+        // Pfade zu deinen Videos (relativ, ohne führenden Slash)
+        var videos = ['videos/video1.mp4', 'videos/video2.mp4'];
+
+        var overlay = document.getElementById('video-overlay');
+        var player = document.getElementById('video-player');
+        var tabs = document.querySelectorAll('.video-tab');
+        var current = 0;
+
+        function load(index, autoplay) {
+          current = index;
+          player.src = videos[index];
+          tabs.forEach(function (t, i) {
+            t.classList.toggle('active', i === index);
+          });
+          if (autoplay) {
+            player.play().catch(function () {});
+          }
+        }
+
+        function openOverlay() {
+          overlay.classList.add('open');
+          load(current, true);
+        }
+
+        function closeOverlay() {
+          player.pause();
+          overlay.classList.remove('open');
+        }
+
+        document.getElementById('video-button').addEventListener('click', openOverlay);
+        document.getElementById('video-close').addEventListener('click', closeOverlay);
+
+        tabs.forEach(function (tab) {
+          tab.addEventListener('click', function () {
+            load(parseInt(tab.dataset.index, 10), true);
+          });
+        });
+
+        // Nach Video 1 automatisch Video 2 starten
+        player.addEventListener('ended', function () {
+          if (current < videos.length - 1) {
+            load(current + 1, true);
+          }
+        });
+
+        // Klick auf den dunklen Hintergrund oder ESC schließt das Overlay
+        overlay.addEventListener('click', function (e) {
+          if (e.target === overlay) closeOverlay();
+        });
+        document.addEventListener('keydown', function (e) {
+          if (e.key === 'Escape' && overlay.classList.contains('open')) closeOverlay();
+        });
+      })();
+    </script>
+
     <!-- Loads <model-viewer> for browsers: -->
     <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
   </body>

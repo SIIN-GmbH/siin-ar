@@ -107,3 +107,96 @@ model-viewer[ar-status="session-started"] > #ar-prompt {
 model-viewer > #ar-prompt > img {
   animation: circle 4s linear infinite;
 }
+
+/* ---------- Video-Button & Overlay ---------- */
+
+#video-button {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 10;
+  background-color: #fff;
+  font-family: Roboto Regular, Helvetica Neue, sans-serif;
+  font-size: 14px;
+  color: #4285f4;
+  height: 36px;
+  line-height: 36px;
+  padding: 0 16px;
+  border-radius: 18px;
+  border: 1px solid #DADCE0;
+  cursor: pointer;
+}
+
+#video-button:active {
+  background-color: #E8EAED;
+}
+
+#video-button:focus {
+  outline: none;
+}
+
+#video-button:focus-visible {
+  outline: 1px solid #4285f4;
+}
+
+#video-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(0, 0, 0, 0.85);
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+#video-overlay.open {
+  display: flex;
+}
+
+#video-overlay video {
+  max-width: 100%;
+  max-height: 75%;
+  background: #000;
+  border-radius: 8px;
+}
+
+#video-close {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  background: #fff;
+  color: #333;
+  font-size: 22px;
+  line-height: 40px;
+  cursor: pointer;
+}
+
+.video-tabs {
+  display: flex;
+  gap: 8px;
+}
+
+.video-tab {
+  font-family: Roboto Regular, Helvetica Neue, sans-serif;
+  font-size: 14px;
+  padding: 8px 16px;
+  border-radius: 18px;
+  border: 1px solid #DADCE0;
+  background: #fff;
+  color: #4285f4;
+  cursor: pointer;
+}
+
+.video-tab.active {
+  background: #4285f4;
+  color: #fff;
+  border-color: #4285f4;
+}
