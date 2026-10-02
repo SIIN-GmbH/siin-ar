@@ -22,73 +22,70 @@
     </model-viewer>
 
     <!-- Video-Button -->
-    <button id="video-button" type="button">Videos ansehen</button>
+    <button id="video-button" type="button">Video abspielen</button>
 
-    <!-- Video-Overlay -->
-    <div id="video-overlay" role="dialog" aria-modal="true" aria-label="Videos">
+    <!-- Video-Overlay (startet im Vollbild, Video wird vorab geladen) -->
+    <div id="video-overlay" role="dialog" aria-modal="true" aria-label="Video">
       <button id="video-close" type="button" aria-label="Schließen">&times;</button>
-      <video id="video-player" controls playsinline preload="metadata"></video>
-      <div class="video-tabs">
-        <button class="video-tab active" type="button" data-index="0">Video 1</button>
-        <button class="video-tab" type="button" data-index="1">Video 2</button>
-      </div>
+      <video id="video-player" src="videos/video1.mp4" controls playsinline preload="auto"></video>
     </div>
 
     <script src="script.js"></script>
     <script>
       (function () {
-        // Pfade zu deinen Videos (relativ, ohne führenden Slash)
-        var videos = ['videos/video1.mp4', 'videos/video2.mp4'];
-
         var overlay = document.getElementById('video-overlay');
         var player = document.getElementById('video-player');
-        var tabs = document.querySelectorAll('.video-tab');
-        var current = 0;
 
-        function load(index, autoplay) {
-          current = index;
-          player.src = videos[index];
-          tabs.forEach(function (t, i) {
-            t.classList.toggle('active', i === index);
-          });
-          if (autoplay) {
-            player.play().catch(function () {});
+        // Video schon beim Seitenaufruf laden
+        player.load();
+
+        function enterFullscreen() {
+          if (overlay.requestFullscreen) {
+            overlay.requestFullscreen().catch(function () {});
+          } else if (overlay.webkitRequestFullscreen) {
+            overlay.webkitRequestFullscreen();
+          } else if (player.webkitEnterFullscreen) {
+            // iPhone Safari: nur das Video selbst kann Vollbild
+            player.webkitEnterFullscreen();
           }
         }
 
-        function openOverlay() {
-          overlay.classList.add('open');
-          load(current, true);
+        function exitFullscreen() {
+          if (document.fullscreenElement && document.exitFullscreen) {
+            document.exitFullscreen().catch(function () {});
+          } else if (document.webkitFullscreenElement && document.webkitExitFullscreen) {
+            document.webkitExitFullscreen();
+          }
         }
 
-        function closeOverlay() {
+        function openVideo() {
+          overlay.classList.add('open');
+          enterFullscreen();
+          player.currentTime = 0;
+          player.play().catch(function () {});
+        }
+
+        function closeVideo() {
           player.pause();
           overlay.classList.remove('open');
+          exitFullscreen();
         }
 
-        document.getElementById('video-button').addEventListener('click', openOverlay);
-        document.getElementById('video-close').addEventListener('click', closeOverlay);
+        document.getElementById('video-button').addEventListener('click', openVideo);
+        document.getElementById('video-close').addEventListener('click', closeVideo);
 
-        tabs.forEach(function (tab) {
-          tab.addEventListener('click', function () {
-            load(parseInt(tab.dataset.index, 10), true);
-          });
-        });
+        // Video zu Ende -> zurück zum Modell
+        player.addEventListener('ended', closeVideo);
 
-        // Nach Video 1 automatisch Video 2 starten
-        player.addEventListener('ended', function () {
-          if (current < videos.length - 1) {
-            load(current + 1, true);
-          }
-        });
-
-        // Klick auf den dunklen Hintergrund oder ESC schließt das Overlay
-        overlay.addEventListener('click', function (e) {
-          if (e.target === overlay) closeOverlay();
-        });
-        document.addEventListener('keydown', function (e) {
-          if (e.key === 'Escape' && overlay.classList.contains('open')) closeOverlay();
-        });
+        // Vollbild per ESC / Geste verlassen -> Overlay schließen
+        function onFsChange() {
+          var fs = document.fullscreenElement || document.webkitFullscreenElement;
+          if (!fs && overlay.classList.contains('open')) closeVideo();
+        }
+        document.addEventListener('fullscreenchange', onFsChange);
+        document.addEventListener('webkitfullscreenchange', onFsChange);
+        // iPhone: Vollbild des Videos beendet
+        player.addEventListener('webkitendfullscreen', closeVideo);
       })();
     </script>
 
